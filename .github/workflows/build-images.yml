@@ -38,7 +38,7 @@ jobs:
     - name: Upload image
       uses: actions/upload-artifact@v3
       with:
-        name: "${{ steps.rename-image.outputs.image_name }}"
-        path: "${{ steps.rename-image.outputs.image_name }}"
+        name: "${{ steps.rename-image.outputs.image_name }}.zip"
+        path: "${{ steps.rename-image.outputs.image_name }}.zip"
     
     # TODO: Create release on tags
