@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Patch for Raspberry Pi 4 ARMv8 to boot correctly.
+# Source: https://github.com/andrewboring/alarm-images/blob/7f1c928c0939f412a706aa70a8b1d1abd38744d9/.github/workflows/build.yml#L45-L55
+
+set -uo pipefail
+
+image_name="$1"
+
+mkdir root
+loopdev=$(sudo losetup --find --show "$image_name")
+rootdev=$(sudo ls "${loopdev}"*2)
+mount "${rootdev}" root
+sed -i 's/mmcblk0/mmcblk1/g' root/etc/fstab
+umount root
+rmdir root

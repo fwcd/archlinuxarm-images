@@ -11,8 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        arch: ['armv7', 'aarch64']
+        arch: ['aarch64', 'rpi-armv7', 'rpi-aarch64']
         flavor: ['vanilla']
+        include:
+        - arch: rpi-aarch64
+          flavor: pi4
 
     steps:
     - uses: actions/checkout@v3
