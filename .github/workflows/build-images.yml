@@ -1,5 +1,7 @@
 # Adapted from https://github.com/andrewboring/alarm-images/blob/master/.github/workflows/build.yml
 
+name: Build Images
+
 on:
   push:
   workflow_dispatch:
@@ -21,11 +23,20 @@ jobs:
         if [[ "${{ matrix.variant }}" != vanilla ]]; then
           script=${{ matrix.variant }}
         fi
-        ./create-image 4G ${{ matrix.arch }} $script
+        sudo ./create-image 4G ${{ matrix.arch }} $script
+    - name: Rename image
+      id: rename-image
+      run: |
+        image_in_name="archlinux-${{ matrix.arch }}.img"
+        image_out_name="archlinux-${{ matrix.arch }}-${{ matrix.variant }}-$(date '+%Y-%m-%d').img"
+        mv "$image_in_name" "$image_out_name"
+        echo "::set-output name=image_name::$image_out_name"
     - name: Compress image
-      run: zip -v archlinux-${{ matrix.arch }}{.zip,}
+      run: zip -v "${{ steps.rename-image.outputs.image_name }}"{.zip,}
     - name: Upload image
       uses: actions/upload-artifact@v3
       with:
-        name: archlinux-${{ matrix.arch }}-${{ matrix.variant }}-$(date '+%Y-%m-%d').zip
-        path: archlinux-${{ matrix.arch }}.zip
+        name: "${{ steps.rename-image.outputs.image_name }}"
+        path: "${{ steps.rename-image.outputs.image_name }}"
+    
+    # TODO: Create release on tags
