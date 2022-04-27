@@ -8,8 +8,8 @@ set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 IFS=$'\n\t' # Ensure we are root
 if [[ $EUID -ne 0 ]]; then
-    echo "This script must be run as root" 1>&2
-    exit 1
+  echo "This script must be run as root" 1>&2
+  exit 1
 fi
 
 # Some useful constants
@@ -34,16 +34,16 @@ loopdev=
 # Tasks to run when the shell exits for any reason, unmount the image and
 # general cleanup
 cleanup() {
-    [[ -f "${mount}${script_dest}" ]] && rm "${mount}${script_dest}"
-    if [[ -d "${mount}" ]]; then
-        umount "${mount}/dev" || true
-        umount "${mount}/proc" || true
-        umount "${mount}/sys" || true
-        umount "${mount}/boot" || true
-        umount "${mount}" || true
-        rmdir "${mount}" || true
-    fi
-    [ -n "${loopdev}" ] && losetup --detach "${loopdev}" || true
+  [[ -f "${mount}${script_dest}" ]] && rm "${mount}${script_dest}"
+  if [[ -d "${mount}" ]]; then
+    umount "${mount}/dev" || true
+    umount "${mount}/proc" || true
+    umount "${mount}/sys" || true
+    umount "${mount}/boot" || true
+    umount "${mount}" || true
+    rmdir "${mount}" || true
+  fi
+  [ -n "${loopdev}" ] && losetup --detach "${loopdev}" || true
 }
 trap cleanup EXIT
 
