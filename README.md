@@ -1,3 +1,3 @@
 # Arch Linux ARM Images
 
-Prebuilt Arch Linux ARM images with some basic utilities (like avahi and ssh) installed.
+Prebuilt Arch Linux ARM images for several architectures and flavors (vanilla, with some basic utilities installed).
