@@ -1,0 +1,83 @@
+#!/bin/bash
+
+# Creates an Arch Linux ARM image e.g. for installation to an SD card
+# Adapted from https://github.com/andrewboring/alarm-images/blob/master/scripts/create-image
+
+# Set up script error handling see https://disconnected.systems/blog/another-bash-strict-mode for details
+set -uo pipefail
+trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
+IFS=$'\n\t' # Ensure we are root
+if [[ $EUID -ne 0 ]]; then
+    echo "This script must be run as root" 1>&2
+    exit 1
+fi
+
+# Some useful constants
+mount="mnt" # Local directory to mount the image (automatically created/delete as needed)
+base_url="http://archlinuxarm.org/os"
+
+# Grab the first two arguments, using the defaults if not set
+# For example, to create a 4 gig image called archlinux-rpi-armv7.img
+# that automatically runs ./setup inside the new root, use:
+#
+#   ./create-image 4G rpi-armv7 ./setup
+#
+size="${1:-8G}"
+arch="${2:-aarch64}"
+file="ArchLinuxARM-${arch}-latest.tar.gz"
+script_source="$3" # Local setup script to run inside the image
+script_dest="/tmp/script"
+loopdev=
+
+# Tasks to run when the shell exits for any reason, unmount the image and
+# general cleanup
+cleanup() {
+    [[ -f "${mount}${script_dest}" ]] && rm "${mount}${script_dest}"
+    if [[ -d "${mount}" ]]; then
+        umount "${mount}/dev" || true
+        umount "${mount}/proc" || true
+        umount "${mount}/sys" || true
+        umount "${mount}/boot" || true
+        umount "${mount}" || true
+        rmdir "${mount}" || true
+    fi
+    [ -n "${loopdev}" ] && losetup --detach "${loopdev}" || true
+}
+trap cleanup EXIT
+
+# Download archlinux arm only if we have not already done so
+echo "==> Downloading ${file}..."
+[ ! -f "${file}" ] && wget --quiet "${base_url}/${file}"
+
+# Create, partition and format the image
+echo "==> Creating image..."
+dd if=/dev/zero of="${image}" bs=1 seek="${size}" count=0
+loopdev=$(losetup --find --show "${image}")
+echo "==> Partitioning image..."
+parted --script "${loopdev}" mklabel msdos
+parted --script "${loopdev}" mkpart primary fat32 0% 200M
+parted --script "${loopdev}" mkpart primary ext4 200M 100%
+echo "==> Formatting image..."
+bootdev=$(ls "${loopdev}"*1)
+rootdev=$(ls "${loopdev}"*2)
+mkfs.vfat -F32 ${bootdev}
+mkfs.ext4 -F ${rootdev}
+
+# Mount the image
+echo "==> Mounting image..."
+[ ! -d "${mount}" ] && mkdir "${mount}"
+mount "${rootdev}" "${mount}"
+[ ! -d "${mount}/boot" ] && mkdir "${mount}/boot"
+mount "${bootdev}" "${mount}/boot"
+
+# Install Arch Linux ARM to the image
+echo "==> Installing Arch Linux ARM root iree to image..."
+tar -xpf "${file}" -C "${mount}" 2> >(grep -v "Ignoring unknown extended header keyword")
+
+# Install setup script to new root
+echo "==> Installing setup script to new root..."
+install -Dm755 "${script_source}" "${mount}${script_dest}"
+
+# Run setup script inside new root
+echo "==> Running setup script..."
+[ -n "${script_dest}" ] && chroot "${mount}" "${script_dest}"
