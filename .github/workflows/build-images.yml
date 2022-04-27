@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         arch: ['armv7', 'aarch64']
-        variant: ['vanilla']
+        flavor: ['vanilla']
 
     steps:
     - uses: actions/checkout@v3
@@ -20,17 +20,24 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y parted wget dosfstools zip
     - name: Build image
       run: |
-        if [[ "${{ matrix.variant }}" != vanilla ]]; then
-          script=${{ matrix.variant }}
+        script_path="setup/${{ matrix.flavor }}"
+        if [ -f "$script_path" ]; then
+          script="$script_path"
         else
           script=""
         fi
         sudo ./create-image 4G ${{ matrix.arch }} $script
+    - name: Patch image
+      run: |
+        patch_path="patch/${{ matrix.flavor }}"
+        if [ -f "$patch_path" ]; then
+          sudo "$patch_path" "archlinux-${{ matrix.arch }}.img"
+        fi
     - name: Rename image
       id: rename-image
       run: |
         image_in_name="archlinux-${{ matrix.arch }}.img"
-        image_out_name="archlinux-${{ matrix.arch }}-${{ matrix.variant }}-$(date '+%Y-%m-%d').img"
+        image_out_name="archlinux-${{ matrix.arch }}-${{ matrix.flavor }}-$(date '+%Y-%m-%d').img"
         mv "$image_in_name" "$image_out_name"
         echo "::set-output name=image_name::$image_out_name"
     - name: Compress image
