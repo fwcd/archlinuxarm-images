@@ -1,0 +1,31 @@
+# Adapted from https://github.com/andrewboring/alarm-images/blob/master/.github/workflows/build.yml
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: ['armv7', 'aarch64']
+        variant: ['vanilla']
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install -y parted wget dosfstools zip
+    - name: Build image
+      run: |
+        if [[ "${{ matrix.variant }}" != vanilla ]]; then
+          script=${{ matrix.variant }}
+        fi
+        ./create-image 4G ${{ matrix.arch }} $script
+    - name: Compress image
+      run: zip -v archlinux-${{ matrix.arch }}{.zip,}
+    - name: Upload image
+      uses: actions/upload-artifact@v3
+      with:
+        name: archlinux-${{ matrix.arch }}-${{ matrix.variant }}-$(date '+%Y-%m-%d').zip
+        path: archlinux-${{ matrix.arch }}.zip
