@@ -22,6 +22,8 @@ jobs:
       run: |
         if [[ "${{ matrix.variant }}" != vanilla ]]; then
           script=${{ matrix.variant }}
+        else
+          script=""
         fi
         sudo ./create-image 4G ${{ matrix.arch }} $script
     - name: Rename image
