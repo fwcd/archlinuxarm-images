@@ -76,10 +76,12 @@ mount "${bootdev}" "${mount}/boot"
 echo "==> Installing Arch Linux ARM root iree to image..."
 tar -xpf "${file}" -C "${mount}" 2> >(grep -v "Ignoring unknown extended header keyword")
 
-# Install setup script to new root
-echo "==> Installing setup script to new root..."
-install -Dm755 "${script_source}" "${mount}${script_dest}"
+if [ -n "${script_source}" ]; then
+  # Install setup script to new root
+  echo "==> Installing setup script to new root..."
+  install -Dm755 "${script_source}" "${mount}${script_dest}"
 
-# Run setup script inside new root
-echo "==> Running setup script..."
-[ -n "${script_dest}" ] && chroot "${mount}" "${script_dest}"
+  # Run setup script inside new root
+  echo "==> Running setup script..."
+  chroot "${mount}" "${script_dest}"
+fi
