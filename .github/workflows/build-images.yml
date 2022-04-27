@@ -20,19 +20,24 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y parted wget dosfstools zip
     - name: Build image
       run: |
-        script_path="setup/${{ matrix.flavor }}"
-        if [ -f "$script_path" ]; then
-          script="$script_path"
-        else
-          script=""
-        fi
+        script=""
+        for script_name in "${{ matrix.arch }}-${{ matrix.flavor }}" "${{ matrix.flavor }}"; do
+          script_path="setup/$script_name"
+          if [ -f "$script_path" ]; then
+            script="$script_path"
+            break
+          fi
+        done
         sudo ./create-image 4G ${{ matrix.arch }} $script
     - name: Patch image
       run: |
-        patch_path="patch/${{ matrix.flavor }}"
-        if [ -f "$patch_path" ]; then
-          sudo "$patch_path" "archlinux-${{ matrix.arch }}.img"
-        fi
+        for patch_name in "${{ matrix.arch }}-${{ matrix.flavor }}" "${{ matrix.flavor }}"; do
+          patch_path="patch/$patch_name"
+          if [ -f "$patch_path" ]; then
+            sudo "$patch_path" "archlinux-${{ matrix.arch }}.img"
+            break
+          fi
+        done
     - name: Rename image
       id: rename-image
       run: |
