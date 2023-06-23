@@ -36,11 +36,7 @@ loopdev=
 cleanup() {
   [[ -f "${mount}${script_dest}" ]] && rm "${mount}${script_dest}"
   if [[ -d "${mount}" ]]; then
-    umount "${mount}/dev" || true
-    umount "${mount}/proc" || true
-    umount "${mount}/sys" || true
-    umount "${mount}/boot" || true
-    umount "${mount}" || true
+    umount -R "${mount}" || true
     rmdir "${mount}" || true
   fi
   [ -n "${loopdev}" ] && losetup --detach "${loopdev}" || true
