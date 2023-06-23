@@ -90,5 +90,5 @@ if [ -n "${script_source}" ]; then
 
   # Removing setup script again...
   echo "==> Removing setup script..."
-  rm "${script_dest}"
+  rm "${mount}${script_dest}"
 fi
