@@ -72,6 +72,13 @@ mount "${bootdev}" "${mount}/boot"
 echo "==> Installing Arch Linux ARM root tree to image..."
 tar -xpf "${file}" -C "${mount}" 2> >(grep -v "Ignoring unknown extended header keyword")
 
+# Initialize the pacman keyring and populate it with the Arch Linux ARM keys
+echo "==> Setting up pacman keyring..."
+cat <<EOF | arch-chroot "${mount}"
+pacman-key --init
+pacman-key --populate archlinuxarm
+EOF
+
 if [ -n "${script_source}" ]; then
   # Install setup script to new root
   echo "==> Installing setup script to new root..."
