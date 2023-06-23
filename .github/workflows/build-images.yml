@@ -20,7 +20,11 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y parted wget dosfstools zip
+      run: sudo apt-get update && sudo apt-get install -y parted wget dosfstools zip arch-install-scripts
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+      with:
+        platforms: arm,arm64
     - name: Build image
       run: |
         script=""
@@ -32,15 +36,6 @@ jobs:
           fi
         done
         sudo ./create-image 4G ${{ matrix.arch }} $script
-    - name: Patch image
-      run: |
-        for patch_name in "${{ matrix.arch }}-${{ matrix.flavor }}" "${{ matrix.flavor }}"; do
-          patch_path="patch/$patch_name"
-          if [ -f "$patch_path" ]; then
-            sudo "$patch_path" "archlinux-${{ matrix.arch }}.img"
-            break
-          fi
-        done
     - name: Rename image
       id: rename-image
       run: |
