@@ -1,7 +1,14 @@
 #!/bin/bash
 
+# Set up the Raspberry Pi 4 sysroot while chrooted into it.
+
 set -uo pipefail
 
 # Patch for Raspberry Pi 4 ARMv8 to boot correctly.
 # See https://github.com/andrewboring/alarm-images/blob/7f1c928c0939f412a706aa70a8b1d1abd38744d9/.github/workflows/build.yml#L45-L55
 sed -i 's/mmcblk0/mmcblk1/g' /etc/fstab
+
+# Install Raspberry Pi foundation's kernel + bootloader due to issues with the default kernel + U-Boot
+# See https://github.com/fwcd/archlinuxarm-images/issues/3
+pacman -R --noconfirm linux-aarch64 uboot-raspberrypi
+pacman -Syu --noconfirm --needed linux-rpi raspberrypi-bootloader raspberrypi-firmware
