@@ -28,7 +28,7 @@ file="ArchLinuxARM-${arch}-latest.tar.gz"
 image="archlinux-${arch}.img"
 # Local setup script to run inside the image
 script_source="${3:-}"
-script_dest="/tmp/script"
+script_dest="/bin/image-setup-script"
 loopdev=
 
 # Tasks to run when the shell exits for any reason, unmount the image and
@@ -79,5 +79,9 @@ if [ -n "${script_source}" ]; then
 
   # Run setup script inside new root
   echo "==> Running setup script..."
-  chroot "${mount}" "${script_dest}"
+  arch-chroot "${mount}" "${script_dest}"
+
+  # Removing setup script again...
+  echo "==> Removing setup script..."
+  rm "${script_dest}"
 fi
