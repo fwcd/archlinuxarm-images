@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -uo pipefail
+
+# Patch for Raspberry Pi 4 ARMv8 to boot correctly.
+# See https://github.com/andrewboring/alarm-images/blob/7f1c928c0939f412a706aa70a8b1d1abd38744d9/.github/workflows/build.yml#L45-L55
+sed -i 's/mmcblk0/mmcblk1/g' /etc/fstab
