@@ -69,7 +69,7 @@ mount "${rootdev}" "${mount}"
 mount "${bootdev}" "${mount}/boot"
 
 # Install Arch Linux ARM to the image
-echo "==> Installing Arch Linux ARM root iree to image..."
+echo "==> Installing Arch Linux ARM root tree to image..."
 tar -xpf "${file}" -C "${mount}" 2> >(grep -v "Ignoring unknown extended header keyword")
 
 if [ -n "${script_source}" ]; then
