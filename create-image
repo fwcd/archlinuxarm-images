@@ -6,7 +6,9 @@
 # Set up script error handling see https://disconnected.systems/blog/another-bash-strict-mode for details
 set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
-IFS=$'\n\t' # Ensure we are root
+IFS=$'\n\t'
+
+# Ensure we are root
 if [[ $EUID -ne 0 ]]; then
   echo "This script must be run as root" 1>&2
   exit 1
@@ -18,17 +20,28 @@ base_url="http://archlinuxarm.org/os"
 
 # Grab the first two arguments, using the defaults if not set
 # For example, to create a 4 gig image called archlinux-rpi-armv7.img
-# that automatically runs ./setup inside the new root, use:
+# that automatically runs ./setup1 and ./setup2 inside the new root, use:
 #
-#   ./create-image 4G rpi-armv7 ./setup
+#   ./create-image 4G rpi-armv7 ./setup1 ./setup2
 #
-size="${1:-8G}"
-arch="${2:-aarch64}"
+
+if [ $# -lt 2 ]; then
+  echo "Usage: $0 <size> <arch> <setup scripts...>"
+  exit 1
+fi
+
+size="$1"
+shift
+
+arch="$1"
+shift
+
 file="ArchLinuxARM-${arch}-latest.tar.gz"
 image="archlinux-${arch}.img"
+
 # Local setup script to run inside the image
-script_source="${3:-}"
-script_dest="/bin/image-setup-script"
+script_sources=("$@")
+script_destdir="/setup-scripts"
 loopdev=
 
 # Tasks to run when the shell exits for any reason, unmount the image and
@@ -79,16 +92,24 @@ pacman-key --init
 pacman-key --populate archlinuxarm
 EOF
 
+# Run setup scripts inside new root
 if [ -n "${script_source}" ]; then
-  # Install setup script to new root
-  echo "==> Installing setup script to new root..."
-  install -Dm755 "${script_source}" "${mount}${script_dest}"
+  echo "==> Setting up setup scripts dir..."
+  mkdir "${mount}${script_destdir}"
 
-  # Run setup script inside new root
-  echo "==> Running setup script..."
-  arch-chroot "${mount}" "${script_dest}"
+  for script in "${script_sources[@]}"; do
+    script_dest="${script_destdir}$(basename "$script")"
 
-  # Removing setup script again...
-  echo "==> Removing setup script..."
-  rm "${mount}${script_dest}"
+    echo "==> Installing $script to $script_dest in new root..."
+    install -Dm755 "${script_source}" "${mount}${script_dest}"
+
+    echo "==> Running $script_dest..."
+    arch-chroot "${mount}" "${script_dest}"
+
+    echo "==> Removing $script_dest from new root..."
+    rm "${mount}${script_dest}"
+  done
+
+  echo "==> Removing setup scripts dir..."
+  rmdir "${mount}${script_destdir}"
 fi
