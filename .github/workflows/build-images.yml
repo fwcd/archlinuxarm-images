@@ -77,4 +77,4 @@ jobs:
       run: |
         tag="${{ steps.create-release.outputs.tag }}"
         archive="${{ steps.rename-image.outputs.image_name }}.zip"
-        gh release upload "$tag" "$archive"
+        gh release upload "$tag" "$archive" --clobber
