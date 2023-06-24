@@ -60,6 +60,9 @@ jobs:
     - name: Create release (if needed)
       if: github.ref == 'refs/heads/main'
       id: create-release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_REPO: ${{ github.repository }}
       run: |
         snapshot="$(date '+%Y-%m-%d')"
         tag="$snapshot"
@@ -68,6 +71,9 @@ jobs:
         gh release create "$tag" --title "$snapshot" || true
     - name: Upload release assets
       if: github.ref == 'refs/heads/main'
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_REPO: ${{ github.repository }}
       run: |
         tag="${{ steps.create-release.outputs.tag }}"
         archive="${{ steps.rename-image.outputs.image_name }}.zip"
