@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -uo pipefail
+
+# Install useful packages
+pacman -Syu --noconfirm --needed avahi sudo iwd neovim git tmux htop python zsh curl rsync
+
+# Enable services
+systemctl enable avahi-daemon
