@@ -27,7 +27,7 @@ if [ "$part_num" = "$part" ]; then
 fi
 
 echo "==> Growing /dev/$part to fill available space..."
-parted /dev/$disk resizepart $part_num 100%
+growpart /dev/$disk $part_num
 
 echo "==> Resizing filesystem..."
 resize2fs /dev/$part
