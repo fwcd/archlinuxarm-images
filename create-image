@@ -92,24 +92,22 @@ pacman-key --init
 pacman-key --populate archlinuxarm
 EOF
 
+echo "==> Setting up setup scripts dir..."
+mkdir "${mount}${script_destdir}"
+
 # Run setup scripts inside new root
-if [ -n "${script_source}" ]; then
-  echo "==> Setting up setup scripts dir..."
-  mkdir "${mount}${script_destdir}"
+for script in "${script_sources[@]}"; do
+  script_dest="${script_destdir}$(basename "$script")"
 
-  for script in "${script_sources[@]}"; do
-    script_dest="${script_destdir}$(basename "$script")"
+  echo "==> Installing $script to $script_dest in new root..."
+  install -Dm755 "$script" "${mount}${script_dest}"
 
-    echo "==> Installing $script to $script_dest in new root..."
-    install -Dm755 "${script_source}" "${mount}${script_dest}"
+  echo "==> Running $script_dest..."
+  arch-chroot "${mount}" "${script_dest}"
 
-    echo "==> Running $script_dest..."
-    arch-chroot "${mount}" "${script_dest}"
+  echo "==> Removing $script_dest from new root..."
+  rm "${mount}${script_dest}"
+done
 
-    echo "==> Removing $script_dest from new root..."
-    rm "${mount}${script_dest}"
-  done
-
-  echo "==> Removing setup scripts dir..."
-  rmdir "${mount}${script_destdir}"
-fi
+echo "==> Removing setup scripts dir..."
+rmdir "${mount}${script_destdir}"
