@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -uo pipefail
+
+# Install and enable avahi (mDNS/DNS-SD stack)
+# This e.g. makes a Pi easy to find on the network (just issue ssh alarm@alarm.local)
+pacman -Syu --noconfirm --needed avahi
+systemctl enable avahi-daemon
