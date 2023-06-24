@@ -61,7 +61,7 @@ jobs:
       if: github.ref == 'refs/heads/main'
       id: create-release
       run: |
-        snapshot="$(date -I)"
+        snapshot="$(date '+%Y-%m-%d')"
         tag="$snapshot"
         echo "snapshot=$snapshot" >> "$GITHUB_OUTPUT"
         echo "tag=$tag" >> "$GITHUB_OUTPUT"
