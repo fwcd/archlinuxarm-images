@@ -33,16 +33,16 @@ jobs:
       with:
         platforms: arm,arm64
     - name: Build image
+      shell: bash
       run: |
-        script=""
-        for script_name in "${{ matrix.arch }}-${{ matrix.flavor }}" "${{ matrix.flavor }}"; do
+        scripts=()
+        for script_name in "${{ matrix.arch }}" "${{ matrix.flavor }}" "${{ matrix.arch }}-${{ matrix.flavor }}"; do
           script_path="setup/$script_name"
           if [ -f "$script_path" ]; then
-            script="$script_path"
-            break
+            scripts+=("$script_path")
           fi
         done
-        sudo ./create-image 4G ${{ matrix.arch }} $script
+        sudo ./create-image 4G ${{ matrix.arch }} "${scripts[@]}"
     - name: Rename image
       id: rename-image
       run: |
