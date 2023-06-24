@@ -122,4 +122,6 @@ done
 
 # Free up some disk space
 echo "==> Cleaning pacman cache..."
-arch-chroot "${mount}" pacman -Scc
+cat <<EOF arch-chroot "${mount}"
+yes | pacman -Scc
+EOF
