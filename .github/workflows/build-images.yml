@@ -22,6 +22,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Configure Git user
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
     - name: Install dependencies
       run: sudo apt-get update && sudo apt-get install -y parted wget dosfstools zip arch-install-scripts
     - name: Set up QEMU
@@ -45,7 +49,7 @@ jobs:
         image_in_name="archlinux-${{ matrix.arch }}.img"
         image_out_name="archlinux-${{ matrix.arch }}-${{ matrix.flavor }}-$(date '+%Y-%m-%d').img"
         mv "$image_in_name" "$image_out_name"
-        echo "::set-output name=image_name::$image_out_name"
+        echo "image_name=$image_out_name" >> "$GITHUB_OUTPUT"
     - name: Compress image
       run: zip -v "${{ steps.rename-image.outputs.image_name }}"{.zip,}
     - name: Upload image
@@ -53,5 +57,27 @@ jobs:
       with:
         name: "${{ steps.rename-image.outputs.image_name }}.zip"
         path: "${{ steps.rename-image.outputs.image_name }}.zip"
-    
-    # TODO: Create release on tags
+    - name: Create tag
+      if: github.ref == 'refs/heads/main'
+      id: create-tag
+      run: |
+        snapshot="$(date -I)"
+        tag="$snapshot"
+        echo "snapshot=$snapshot" >> "$GITHUB_OUTPUT"
+        echo "tag=$tag" >> "$GITHUB_OUTPUT"
+        git fetch --tags
+        if git rev-parse "$tag" >/dev/null 2>&1; then
+          echo "tag_created=false" >> "$GITHUB_OUTPUT"
+        else
+          git tag -am "$snapshot" "$tag"
+          git push origin "$tag"
+          echo "tag_created=true" >> "$GITHUB_OUTPUT"
+        fi
+      shell: bash
+    - name: Create GitHub release
+      if: ${{ steps.create-tag.outputs.tag_created == 'true' }}
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.create-tag.outputs.tag }}
+        name: ${{ steps.create-tag.outputs.snapshot }}
+        files: "${{ steps.rename-image.outputs.image_name }}.zip"
