@@ -42,7 +42,7 @@ jobs:
             scripts+=("$script_path")
           fi
         done
-        sudo ./create-image 4G ${{ matrix.arch }} "${scripts[@]}"
+        sudo ./create-image 2G ${{ matrix.arch }} "${scripts[@]}"
     - name: Rename image
       id: rename-image
       run: |
