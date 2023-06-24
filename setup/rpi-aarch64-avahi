@@ -2,8 +2,9 @@
 
 set -uo pipefail
 
-# Inherit the vanilla configuration
-. "$(dirname "${BASH_SOURCE[@]}")/rpi-aarch64-vanilla"
+# Replace default kernel + U-Boot with Raspberry Pi foundation's kernel + bootloader
+# See https://github.com/fwcd/archlinuxarm-images/issues/3
+pacman -Syu --noconfirm --needed linux-rpi raspberrypi-bootloader raspberrypi-firmware
 
 # Install and enable avahi (mDNS/DNS-SD stack)
 # This makes the Pi easy to find on the network (just issue ssh alarm@alarm.local)

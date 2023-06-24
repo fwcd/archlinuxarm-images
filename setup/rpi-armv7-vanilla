@@ -2,5 +2,6 @@
 
 set -uo pipefail
 
-# Inherit the generic configuration
-. "$(dirname "${BASH_SOURCE[@]}")/rpi-generic"
+# Replace default kernel + U-Boot with Raspberry Pi foundation's kernel + bootloader
+# See https://github.com/fwcd/archlinuxarm-images/issues/3
+pacman -Syu --noconfirm --needed linux-rpi raspberrypi-bootloader raspberrypi-firmware
