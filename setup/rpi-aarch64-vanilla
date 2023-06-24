@@ -4,4 +4,5 @@ set -uo pipefail
 
 # Replace default kernel + U-Boot with Raspberry Pi foundation's kernel + bootloader
 # See https://github.com/fwcd/archlinuxarm-images/issues/3
+pacman -R --noconfirm linux-aarch64 uboot-raspberrypi
 pacman -Syu --noconfirm --needed linux-rpi raspberrypi-bootloader raspberrypi-firmware
