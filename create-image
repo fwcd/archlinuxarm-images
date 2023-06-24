@@ -97,7 +97,7 @@ mkdir "${mount}${script_destdir}"
 
 # Run setup scripts inside new root
 for script in "${script_sources[@]}"; do
-  script_dest="${script_destdir}$(basename "$script")"
+  script_dest="${script_destdir}/$(basename "$script")"
 
   echo "==> Installing $script to $script_dest in new root..."
   install -Dm755 "$script" "${mount}${script_dest}"
