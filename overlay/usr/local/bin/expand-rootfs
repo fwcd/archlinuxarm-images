@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# https://github.com/Drewsif/PiShrink/blob/master/pishrink.sh
+# https://unix.stackexchange.com/questions/373063/auto-expand-last-partition-to-use-all-unallocated-space-using-parted-in-batch-m
+
+set -uo pipefail
+
+if [ $EUID -ne 0 ]; then
+  echo "This script must be run as root!" 1>&2
+  exit 1
+fi
+
+function disable() {
+  echo "==> Disabling expand-rootfs service after run..."
+  systemctl disable expand-rootfs
+}
+
+trap disable EXIT
+
+disk=mmcblk0
+part="$(mount | sed -n 's|^/dev/\(.*\) on / .*|\1|p')"
+part_num="${part#${disk}p}"
+
+if [ "$part_num" = "$part" ]; then
+  echo "$part is not an SD card (expected disk $disk), skipping expansion..."
+  exit 0
+fi
+
+echo "==> Growing /dev/$part to fill available space..."
+parted /dev/$disk resizepart $part_num 100%
+
+echo "==> Resizing filesystem..."
+resize2fs /dev/$part

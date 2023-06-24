@@ -85,12 +85,24 @@ mount "${bootdev}" "${mount}/boot"
 echo "==> Installing Arch Linux ARM root tree to image..."
 tar -xpf "${file}" -C "${mount}" 2> >(grep -v "Ignoring unknown extended header keyword")
 
+# Copy overlay tree to the image
+echo "==> Installing overlay tree to image..."
+rsync -avP "$(dirname $0)/overlay/" "${mount}/"
+
 # Initialize the pacman keyring and populate it with the Arch Linux ARM keys
 echo "==> Setting up pacman keyring..."
 cat <<EOF | arch-chroot "${mount}"
 pacman-key --init
 pacman-key --populate archlinuxarm
 EOF
+
+# Install parted into the image
+echo "==> Installing parted..."
+arch-chroot "${mount}" pacman -Syu --noconfirm --needed parted
+
+# Set up a systemd service for automatically growing the partition
+echo "==> Setting up systemd service for automatically expanding the fs to the SD card on first boot..."
+arch-chroot "${mount}" systemctl enable expand-rootfs
 
 echo "==> Setting up setup scripts dir..."
 mkdir "${mount}${script_destdir}"
