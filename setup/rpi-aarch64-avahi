@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -uo pipefail
+
+# Inherit the vanilla configuration
+. "$(dirname "${BASH_SOURCE[@]}")/rpi-aarch64-vanilla"
+
+# Install and enable avahi (mDNS/DNS-SD stack)
+# This makes the Pi easy to find on the network (just issue ssh alarm@alarm.local)
+pacman -Syu --noconfirm --needed avahi
+systemctl enable avahi-daemon

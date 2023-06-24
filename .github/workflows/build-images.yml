@@ -16,6 +16,9 @@ jobs:
       matrix:
         arch: ['aarch64', 'rpi-armv7', 'rpi-aarch64']
         flavor: ['vanilla']
+        include:
+        - arch: rpi-aarch64
+          flavor: avahi
 
     steps:
     - uses: actions/checkout@v3
