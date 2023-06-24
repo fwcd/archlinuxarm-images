@@ -6,4 +6,4 @@ set -uo pipefail
 pacman -Syu --noconfirm --needed avahi sudo iwd neovim git tmux htop python zsh curl rsync
 
 # Enable services
-systemctl enable avahi-daemon
+systemctl enable avahi-daemon iwd
