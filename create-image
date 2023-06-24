@@ -47,7 +47,7 @@ loopdev=
 # Tasks to run when the shell exits for any reason, unmount the image and
 # general cleanup
 cleanup() {
-  [[ -f "${mount}${script_dest}" ]] && rm "${mount}${script_dest}"
+  rm -rf "${mount}${script_destdir}"
   if [[ -d "${mount}" ]]; then
     umount -R "${mount}" || true
     rmdir "${mount}" || true
@@ -85,11 +85,26 @@ mount "${bootdev}" "${mount}/boot"
 echo "==> Installing Arch Linux ARM root tree to image..."
 tar -xpf "${file}" -C "${mount}" 2> >(grep -v "Ignoring unknown extended header keyword")
 
+# Copy overlay tree to the image
+echo "==> Installing overlay tree to image..."
+rsync -avP "$(dirname $0)/overlay/" "${mount}/"
+
 # Initialize the pacman keyring and populate it with the Arch Linux ARM keys
 echo "==> Setting up pacman keyring..."
 cat <<EOF | arch-chroot "${mount}"
 pacman-key --init
 pacman-key --populate archlinuxarm
+EOF
+
+# Install parted into the image
+echo "==> Installing parted..."
+arch-chroot "${mount}" pacman -Syu --noconfirm --needed parted
+
+# Set up a systemd service for automatically growing the partition
+echo "==> Setting up systemd service for automatically expanding the fs to the SD card on first boot..."
+cat <<EOF | arch-chroot "${mount}"
+ls /etc/systemd/system
+systemctl enable expand-rootfs
 EOF
 
 echo "==> Setting up setup scripts dir..."
@@ -108,6 +123,3 @@ for script in "${script_sources[@]}"; do
   echo "==> Removing $script_dest from new root..."
   rm "${mount}${script_dest}"
 done
-
-echo "==> Removing setup scripts dir..."
-rmdir "${mount}${script_destdir}"

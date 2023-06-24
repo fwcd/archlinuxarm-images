@@ -1,0 +1,11 @@
+[Unit]
+Description=Expand root partition and filesystem to SD card
+After=local-fs.target
+Wants=local-fs.target
+
+[Service]
+ExecStart=/usr/local/bin/expand-rootfs
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target
