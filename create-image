@@ -98,7 +98,7 @@ EOF
 
 # Set up a service that expands the file system to fill the SD card on first boot
 echo "==> Setting up systemd service for expanding fs on first boot..."
-cat <<EOF arch-chroot "${mount}"
+cat <<EOF | arch-chroot "${mount}"
 systemctl enable expand-rootfs
 EOF
 
@@ -121,6 +121,6 @@ done
 
 # Free up some disk space
 echo "==> Cleaning pacman cache..."
-cat <<EOF arch-chroot "${mount}"
+cat <<EOF | arch-chroot "${mount}"
 yes | pacman -Scc
 EOF
