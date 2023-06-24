@@ -96,14 +96,10 @@ pacman-key --init
 pacman-key --populate archlinuxarm
 EOF
 
-# Install parted into the image
-echo "==> Installing parted..."
-arch-chroot "${mount}" pacman -Syu --noconfirm --needed parted
-
-# Set up a systemd service for automatically growing the partition
-echo "==> Setting up systemd service for automatically expanding the fs to the SD card on first boot..."
+# Set up a service that expands the file system to fill the SD card on first boot
+echo "==> Setting up systemd service for expanding fs on first boot..."
 cat <<EOF | arch-chroot "${mount}"
-ls /etc/systemd/system
+arch-chroot "${mount}" pacman -Syu --noconfirm --needed parted
 systemctl enable expand-rootfs
 EOF
 
