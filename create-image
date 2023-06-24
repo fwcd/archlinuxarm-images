@@ -47,7 +47,7 @@ loopdev=
 # Tasks to run when the shell exits for any reason, unmount the image and
 # general cleanup
 cleanup() {
-  [[ -f "${mount}${script_dest}" ]] && rm "${mount}${script_dest}"
+  rm -rf "${mount}${script_destdir}"
   if [[ -d "${mount}" ]]; then
     umount -R "${mount}" || true
     rmdir "${mount}" || true
@@ -120,6 +120,3 @@ for script in "${script_sources[@]}"; do
   echo "==> Removing $script_dest from new root..."
   rm "${mount}${script_dest}"
 done
-
-echo "==> Removing setup scripts dir..."
-rmdir "${mount}${script_destdir}"
