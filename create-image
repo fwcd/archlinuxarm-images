@@ -119,3 +119,7 @@ for script in "${script_sources[@]}"; do
   echo "==> Removing $script_dest from new root..."
   rm "${mount}${script_dest}"
 done
+
+# Free up some disk space
+echo "==> Cleaning pacman cache..."
+arch-chroot "${mount}" pacman -Scc
