@@ -57,27 +57,18 @@ jobs:
       with:
         name: "${{ steps.rename-image.outputs.image_name }}.zip"
         path: "${{ steps.rename-image.outputs.image_name }}.zip"
-    - name: Create tag
+    - name: Create release (if needed)
       if: github.ref == 'refs/heads/main'
-      id: create-tag
+      id: create-release
       run: |
         snapshot="$(date -I)"
         tag="$snapshot"
         echo "snapshot=$snapshot" >> "$GITHUB_OUTPUT"
         echo "tag=$tag" >> "$GITHUB_OUTPUT"
-        git fetch --tags
-        if git rev-parse "$tag" >/dev/null 2>&1; then
-          echo "tag_created=false" >> "$GITHUB_OUTPUT"
-        else
-          git tag -am "$snapshot" "$tag"
-          git push origin "$tag"
-          echo "tag_created=true" >> "$GITHUB_OUTPUT"
-        fi
-      shell: bash
-    - name: Create GitHub release
-      if: ${{ steps.create-tag.outputs.tag_created == 'true' }}
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: ${{ steps.create-tag.outputs.tag }}
-        name: ${{ steps.create-tag.outputs.snapshot }}
-        files: "${{ steps.rename-image.outputs.image_name }}.zip"
+        gh release create "$tag" --title "$snapshot" || true
+    - name: Upload release assets
+      if: github.ref == 'refs/heads/main'
+      run: |
+        tag="${{ steps.create-release.outputs.tag }}"
+        archive="${{ steps.rename-image.outputs.image_name }}.zip"
+        gh release upload "$tag" "$archive"
