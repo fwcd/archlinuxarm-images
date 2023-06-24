@@ -98,7 +98,9 @@ EOF
 
 # Set up a service that expands the file system to fill the SD card on first boot
 echo "==> Setting up systemd service for expanding fs on first boot..."
-arch-chroot "${mount}" systemctl enable expand-rootfs
+cat <<EOF arch-chroot "${mount}"
+systemctl enable expand-rootfs
+EOF
 
 echo "==> Setting up setup scripts dir..."
 mkdir "${mount}${script_destdir}"
