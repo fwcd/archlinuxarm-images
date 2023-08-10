@@ -1,9 +1,9 @@
 name: Trigger Build
 
 on:
-  # Run every day at 05:10 (to avoid the peak times)
+  # Run every Sunday at 05:10 (to avoid the peak times)
   schedule:
-  - cron: '10 5 * * *'
+  - cron: '10 5 * * 0'
   workflow_dispatch:
 
 jobs:
