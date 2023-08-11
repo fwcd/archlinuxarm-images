@@ -20,7 +20,7 @@ jobs:
         - arch: rpi-aarch64
           flavor: avahi
         - arch: rpi-aarch64
-          flavor: deluxe
+          flavor: fwcd
 
     steps:
     - uses: actions/checkout@v3
