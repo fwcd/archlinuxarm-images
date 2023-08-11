@@ -2,8 +2,30 @@
 
 set -uo pipefail
 
+# Add fwcd repo
+cat <<EOF >> /etc/pacman.conf
+
+[fwcd]
+Server = https://github.com/fwcd/arch-repo/releases/latest/download
+SigLevel = Never
+EOF
+
 # Install useful packages
-pacman -Syu --noconfirm --needed avahi sudo iwd neovim git tmux htop python zsh curl rsync
+packages=(
+  avahi
+  curl
+  git
+  htop
+  iwd
+  neovim
+  python
+  rsync
+  sudo
+  tmux
+  yay
+  zsh
+)
+pacman -Syu --noconfirm --needed "${packages[@]}"
 
 # Enable services
 systemctl enable avahi-daemon iwd
