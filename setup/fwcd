@@ -22,7 +22,8 @@ packages=(
   rsync
   sudo
   tmux
-  yay
+  # TODO: There seems to be some issue with https://github.com/fwcd/arch-repo
+  # yay
   zsh
 )
 pacman -Syu --noconfirm --needed "${packages[@]}"
