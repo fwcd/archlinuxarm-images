@@ -6,7 +6,7 @@ set -uo pipefail
 cat <<EOF >> /etc/pacman.conf
 
 [fwcd]
-Server = https://github.com/fwcd/arch-repo/releases/latest/download
+Server = https://github.com/fwcd/arch-repo-\$arch/releases/latest/download
 SigLevel = Never
 EOF
 
