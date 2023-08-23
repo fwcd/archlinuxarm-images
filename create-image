@@ -87,7 +87,7 @@ tar -xpf "${file}" -C "${mount}" 2> >(grep -v "Ignoring unknown extended header 
 
 # Copy overlay tree to the image
 echo "==> Installing overlay tree to image..."
-rsync -avP "$(dirname $0)/overlay/" "${mount}/"
+rsync -rlDvP "$(dirname $0)/overlay/" "${mount}/"
 
 # Initialize the pacman keyring and populate it with the Arch Linux ARM keys
 echo "==> Setting up pacman keyring..."
