@@ -23,6 +23,7 @@ packages=(
   rsync
   sudo
   tmux
+  tree
   yay
   zsh
 )
