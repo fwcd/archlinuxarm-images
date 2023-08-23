@@ -17,6 +17,7 @@ packages=(
   git
   htop
   iwd
+  man-db
   neovim
   python
   rsync
