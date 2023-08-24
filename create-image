@@ -56,47 +56,42 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# Download archlinux arm only if we have not already done so
-echo "==> Downloading ${file}..."
+echo "==> Downloading Arch Linux ARM tarball (${file})..."
 [ ! -f "${file}" ] && wget --quiet "${base_url}/${file}"
 
-# Create, partition and format the image
 echo "==> Creating image..."
 dd if=/dev/zero of="${image}" bs=1 seek="${size}" count=0
 loopdev=$(losetup --find --show "${image}")
+
 echo "==> Partitioning image..."
 parted --script "${loopdev}" mklabel msdos
 parted --script "${loopdev}" mkpart primary fat32 0% 200M
 parted --script "${loopdev}" mkpart primary ext4 200M 100%
+
 echo "==> Formatting image..."
 bootdev=$(ls "${loopdev}"*1)
 rootdev=$(ls "${loopdev}"*2)
 mkfs.vfat -F32 ${bootdev}
 mkfs.ext4 -F ${rootdev}
 
-# Mount the image
 echo "==> Mounting image..."
 [ ! -d "${mount}" ] && mkdir "${mount}"
 mount "${rootdev}" "${mount}"
 [ ! -d "${mount}/boot" ] && mkdir "${mount}/boot"
 mount "${bootdev}" "${mount}/boot"
 
-# Install Arch Linux ARM to the image
 echo "==> Installing Arch Linux ARM root tree to image..."
 tar -xpf "${file}" -C "${mount}" 2> >(grep -v "Ignoring unknown extended header keyword")
 
-# Copy overlay tree to the image
 echo "==> Installing overlay tree to image..."
 rsync -rlDvP "$(dirname $0)/overlay/" "${mount}/"
 
-# Initialize the pacman keyring and populate it with the Arch Linux ARM keys
 echo "==> Setting up pacman keyring..."
 cat <<EOF | arch-chroot "${mount}"
 pacman-key --init
 pacman-key --populate archlinuxarm
 EOF
 
-# Set up a service that expands the file system to fill the SD card on first boot
 echo "==> Setting up systemd service for expanding fs on first boot..."
 cat <<EOF | arch-chroot "${mount}"
 systemctl enable expand-rootfs
@@ -119,7 +114,6 @@ for script in "${script_sources[@]}"; do
   rm "${mount}${script_dest}"
 done
 
-# Free up some disk space
 echo "==> Cleaning pacman cache..."
 cat <<EOF | arch-chroot "${mount}"
 yes | pacman -Scc
