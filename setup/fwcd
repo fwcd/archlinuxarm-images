@@ -24,12 +24,12 @@ packages=(
   iwd
   man-db
   neovim
+  paru-bin
   python
   rsync
   sudo
   tmux
   tree
-  yay
   zsh
 )
 pacman -Syu --noconfirm --needed "${packages[@]}"
