@@ -20,6 +20,7 @@ sed -i 's/#\(ParallelDownloads \)/\1/g' /etc/pacman.conf
 
 # Install useful packages
 packages=(
+  arch-install-scripts
   avahi
   curl
   git
