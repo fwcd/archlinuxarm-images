@@ -27,6 +27,7 @@ packages=(
   iwd
   man-db
   neovim
+  pacman-contrib
   paru-bin
   python
   rsync
