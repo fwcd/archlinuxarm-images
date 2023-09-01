@@ -6,3 +6,27 @@ set -uo pipefail
 # See https://github.com/fwcd/archlinuxarm-images/issues/3
 pacman -R --noconfirm linux-aarch64 uboot-raspberrypi
 pacman -Syu --noconfirm --needed linux-rpi raspberrypi-bootloader raspberrypi-firmware
+
+# Back up config file
+cp /boot/config.txt{,.backup}
+
+# Patch config for Raspberry Pi 4 to enable audio and video
+# (though the lattest still has issues e.g. with skewed output)
+# See https://forum.endeavouros.com/t/custom-kernels-on-raspi-4/39059/3
+# Source: https://github.com/endeavouros-arm/calamares-image/blob/5bce559d/configs/rpi4-config.txt
+cat <<EOF > /boot/config.txt
+# See /boot/overlays/README for all available options
+
+dtparam=audio=on
+dtoverlay=vc4-kms-v3d
+display_auto_detect=1
+disable_overscan=1
+initramfs initramfs-linux.img followkernel
+
+#Uncomment to enable bluetooth
+#dtparam=krnbt=on
+
+[pi4]
+# Run as fast as firmware / board allows
+arm_boost=1
+EOF
